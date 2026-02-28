@@ -17,3 +17,5 @@ build.ninja
 _Summary
 build.sh
 ch582_wireless/
+version.h
+vial_generated_keyboard_definition.h

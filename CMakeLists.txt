@@ -238,6 +238,12 @@ else()
     add_executable(${keyboard}.elf ${APP_SOURCES})
     add_executable(${keyboard}_IAP.elf ${IAP_SOURCES})
 
+    add_dependencies(${keyboard}.elf generate_vial_headers)
+    add_dependencies(${keyboard}_IAP.elf generate_vial_headers)
+
+    add_dependencies(${keyboard}.elf generate_build_id_headers)
+    add_dependencies(${keyboard}_IAP.elf generate_build_id_headers)
+
     target_compile_definitions(${keyboard}.elf PUBLIC __BUILDING_APP__=1)
     target_compile_definitions(${keyboard}_IAP.elf PUBLIC __BUILDING_IAP__=1)
 

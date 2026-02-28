@@ -18,6 +18,7 @@ include_sub_directories_recursively(${QMK_BASE_DIR}/quantum)
 
 include_directories(${QMK_BASE_DIR})
 include_directories(${QMK_BASE_DIR}/platforms)
+include_directories(${QMK_BASE_DIR}/../)
 
 file(GLOB_RECURSE quantum_SOURCES
 
@@ -34,6 +35,8 @@ file(GLOB_RECURSE quantum_SOURCES
 
     # "${QMK_BASE_DIR}/quantum/painter/*.c"
     "${QMK_BASE_DIR}/quantum/process_keycode/process_magic.c"
+    
+    "${QMK_BASE_DIR}/quantum/process_keycode/process_default_layer.c"
 
     # "${QMK_BASE_DIR}/quantum/sequencer/*.c"
     # "${QMK_BASE_DIR}/quantum/split_common/*.c"

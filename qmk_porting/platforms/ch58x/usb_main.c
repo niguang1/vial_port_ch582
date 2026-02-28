@@ -6,6 +6,7 @@
 #include "rgb_led.h"
 #include "protocol_supplement.h"
 #include "wait.h"
+#include "HAL.h"
 
 static uint8_t usbTaskId = INVALID_TASK_ID;
 extern void suspend_power_down_quantum();
@@ -20,7 +21,7 @@ static uint16_t usb_ProcessEvent(uint8_t task_id, uint16_t events)
         wireless_indicator_daemon();
 #endif
 
-#if !defined(NO_USB_STARTUP_CHECK)
+#if defined(NO_USB_STARTUP_CHECK)
         static bool suspended = false;
 
         do {

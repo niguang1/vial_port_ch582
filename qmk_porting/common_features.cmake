@@ -147,6 +147,57 @@ if(VIA_ENABLE)
     )
 endif()
 
+# VIAL_ENABLE
+# todo 处理INTERMEDIATE_OUTPUT
+if(VIAL_ENABLE)
+    message(STATUS "VIAL_ENABLE")
+    
+    add_definitions(-DVIAL_ENABLE -DRAW_ENABLE -DDYNAMIC_KEYMAP_ENABLE)
+    set(EEPROM_ENABLE ON CACHE BOOL "QMK" FORCE)
+
+    set(KEYMAP_PATH    ${CMAKE_CURRENT_SOURCE_DIR}/qmk_porting/keyboards/${keyboard}/keymaps/${keymap})
+
+    set(GEN_VIAL_KB_DEFINE_SCRIPT ${QMK_BASE_DIR}/util/vial_generate_definition.py)
+    set(GEN_VIAL_KB_DEFINE_OUT    ${CMAKE_CURRENT_SOURCE_DIR}/vial_generated_keyboard_definition.h)
+
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_custom_command(
+        OUTPUT ${GEN_VIAL_KB_DEFINE_OUT}
+        COMMAND ${Python3_EXECUTABLE} ${GEN_VIAL_KB_DEFINE_SCRIPT} ${KEYMAP_PATH}/vial.json ${GEN_VIAL_KB_DEFINE_OUT}
+        DEPENDS ${GEN_VIAL_KB_DEFINE_SCRIPT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating ${GEN_VIAL_KB_DEFINE_OUT} with gen.py"
+        VERBATIM
+        BYPRODUCTS ${GEN_VIAL_KB_DEFINE_OUT}
+    )
+    add_custom_target(generate_vial_headers DEPENDS ${GEN_VIAL_KB_DEFINE_OUT})
+    set_source_files_properties(${GEN_VIAL_KB_DEFINE_OUT} PROPERTIES GENERATED TRUE)
+
+    # 处理BUILD_ID报错 qmk_firmware/quantum/via.c:104:22: error: 'BUILD_ID' undeclared (first use in this function)
+    # 104 |     uint8_t magic0 = BUILD_ID & 0xFF;
+    set(GEN_BUILD_ID_SCRIPT ${QMK_BASE_DIR}/util/build_id.py)
+    set(GEN_BUILD_ID_OUT    ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
+    add_custom_command(
+        OUTPUT ${GEN_BUILD_ID_OUT}
+        COMMAND ${Python3_EXECUTABLE} ${GEN_BUILD_ID_SCRIPT} > ${GEN_BUILD_ID_OUT}
+        DEPENDS ${GEN_BUILD_ID_SCRIPT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        COMMENT "Generating ${GEN_BUILD_ID_OUT} with build_id.py"
+        VERBATIM
+        BYPRODUCTS ${GEN_BUILD_ID_OUT}
+    )
+    add_custom_target(generate_build_id_headers DEPENDS ${GEN_BUILD_ID_OUT})
+    set_source_files_properties(${GEN_BUILD_ID_OUT} PROPERTIES GENERATED TRUE)
+
+    list(APPEND quantum_SOURCES
+        "${GEN_VIAL_KB_DEFINE_OUT}"
+        "${GEN_BUILD_ID_OUT}"
+        "${QMK_BASE_DIR}/quantum/dynamic_keymap.c"
+        "${QMK_BASE_DIR}/quantum/via.c"
+        "${QMK_BASE_DIR}/quantum/vial.c"
+    )
+endif()
+
 # DIP_SWITCH_ENABLE
 if(DIP_SWITCH_ENABLE)
     add_definitions(-DDIP_SWITCH_ENABLE)

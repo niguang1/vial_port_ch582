@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "usb_ch58x_usbfs_reg.h"
+#include "HAL.h"
 
 #define MSC_IN_EP          0x81
 #define MSC_OUT_EP         0x02
