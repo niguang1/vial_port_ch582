@@ -39,20 +39,20 @@ extern unsigned int ecdsa_pub_key_len;
  *       key file. If no key file was configured, the array and length must be
  *       provided and added to the build manually.
  */
-#if defined(HAVE_KEYS)
-const struct bootutil_key bootutil_keys[] = {
-    {
-#if defined(MCUBOOT_SIGN_RSA)
-        .key = rsa_pub_key,
-        .len = &rsa_pub_key_len,
-#elif defined(MCUBOOT_SIGN_EC256)
-        .key = ecdsa_pub_key,
-        .len = &ecdsa_pub_key_len,
-#endif
-    },
-};
-const int bootutil_key_cnt = 1;
-#endif /* HAVE_KEYS */
+// #if defined(HAVE_KEYS)
+// const struct bootutil_key bootutil_keys[] = {
+//     {
+// #if defined(MCUBOOT_SIGN_RSA)
+//         .key = rsa_pub_key,
+//         .len = &rsa_pub_key_len,
+// #elif defined(MCUBOOT_SIGN_EC256)
+//         .key = ecdsa_pub_key,
+//         .len = &ecdsa_pub_key_len,
+// #endif
+//     },
+// };
+// const int bootutil_key_cnt = 1;
+// #endif /* HAVE_KEYS */
 
 static const struct flash_area iap = {
     .fa_id = FLASH_AREA_BOOTLOADER,

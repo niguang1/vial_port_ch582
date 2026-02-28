@@ -45,6 +45,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define EARLY_INIT_PERFORM_BOOTLOADER_JUMP FALSE
 
+#define BATTERY_MEASURE_PIN A4
+#define POWER_DETECT_PIN    B12
+
 /* define if matrix has ghost */
 // #define MATRIX_HAS_GHOST
 

@@ -198,8 +198,8 @@ if(BUILD_WIRELESS_LIB)
     include(${WIRELESS_SUBMODULE_PATH}/gen_lib.cmake)
 else()
     if(NOT ESB_ENABLE OR(ESB_ENABLE AND ESB_ROLE STREQUAL "keyboard"))
-        set(WIRELESS_LIB_INCLUDE ${KEYBOARD_ROOT}/wireless/include)
-        set(WIRELESS_LIB_FILE ${KEYBOARD_ROOT}/wireless/lib${keyboard}.a)
+        set(WIRELESS_LIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB)
+        set(WIRELESS_LIB_FILE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB/LIBCH58xBLE.a)
         set(HEX_FILE_APP ${PROJECT_BINARY_DIR}/${keyboard}.hex)
         set(HEX_FILE_APP_SIGNED ${PROJECT_BINARY_DIR}/${keyboard}_signed.hex)
         set(BIN_FILE_APP ${PROJECT_BINARY_DIR}/${keyboard}.bin)
@@ -224,13 +224,14 @@ else()
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot_porting"
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/bootutil/include"
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/bootutil/src"
-    )
-    file(GLOB bootutil_sources
+        )
+        file(GLOB bootutil_sources
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/bootutil/src/*.c"
-    )
-    target_sources(mcuboot_porting INTERFACE
+        )
+        target_sources(mcuboot_porting INTERFACE
         ${bootutil_sources}
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot_porting/mcuboot_port.c"
+        "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/cypress/MCUBootApp/keys.c"
     )
     target_link_libraries(mcuboot_porting INTERFACE mbedtls)
     target_link_libraries(mcuboot_porting INTERFACE CH582_IAP)

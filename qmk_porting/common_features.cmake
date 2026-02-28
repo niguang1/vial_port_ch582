@@ -498,6 +498,19 @@ endif()
 
 # BLE_ENABLE
 if(BLE_ENABLE)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/BLE)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/include)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/../sdk/HAL/include)
+    list(APPEND QMK_PORTING_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/protocol/protocol_ble.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/hidbed.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/battservice.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/devinfoservice.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/hiddev.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/hidkbdservice.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/scanparamservice.c"
+    )
+
     if(ESB_ENABLE AND ESB_ROLE STREQUAL "dongle")
         message(STATUS "Dongle shouldn't have BLE_ENABLE, ignore")
     else()
