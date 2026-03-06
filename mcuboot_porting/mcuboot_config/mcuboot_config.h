@@ -40,9 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /* Uncomment for RSA signature support */
-#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
-#define MCUBOOT_SIGN_RSA
-#endif
+// #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+// #define MCUBOOT_SIGN_RSA
+// #endif
 
 /* Uncomment for ECDSA signatures using curve P-256. */
 // #define MCUBOOT_SIGN_EC256

@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug imgtool sign",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcuboot/scripts/imgtool.py",
+            "args": [
+                "sign",
+                "--header-size", "0x1000",
+                "--align", "4",
+                "--slot-size", "0x5e000",
+                "--version", "1.0.0",
+                "--pad-header",
+                "--load-addr", "0x8000000",
+                "${workspaceFolder}/build/starlight.hex",
+                "${workspaceFolder}/build/starlight_signed.hex"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/mcuboot/scripts"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

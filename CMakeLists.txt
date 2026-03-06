@@ -231,7 +231,6 @@ else()
         target_sources(mcuboot_porting INTERFACE
         ${bootutil_sources}
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot_porting/mcuboot_port.c"
-        "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/cypress/MCUBootApp/keys.c"
     )
     target_link_libraries(mcuboot_porting INTERFACE mbedtls)
     target_link_libraries(mcuboot_porting INTERFACE CH582_IAP)

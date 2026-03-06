@@ -173,11 +173,11 @@ __HIGH_CODE void board_flash_write(uint32_t addr, void const *data, uint32_t len
     uint8_t handle_data[len];
 
     my_memcpy(handle_data, data, len);
-#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
-    extern void iap_handle_data(uint32_t start_address, uint8_t * data, uint32_t len);
+// #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+//     extern void iap_handle_data(uint32_t start_address, uint8_t * data, uint32_t len);
 
-    iap_handle_data(addr, handle_data, len);
-#endif
+//     iap_handle_data(addr, handle_data, len);
+// #endif
 
     uint16_t offset = addr % EEPROM_BLOCK_SIZE;
 
@@ -288,14 +288,14 @@ __HIGH_CODE static void iap_jump_app(uint8_t need_cleanup)
 {
     uint32_t jump_address = 0;
 
-#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
-    extern bool iap_validate(uint32_t * address);
+// #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+//     extern bool iap_validate(uint32_t * address);
 
-    if (iap_validate(&jump_address)) {
-        PRINT("Validated.\n");
-        goto jump;
-    }
-#endif
+//     if (iap_validate(&jump_address)) {
+//         PRINT("Validated.\n");
+//         goto jump;
+//     }
+// #endif
 
     struct boot_rsp rsp;
     fih_int rc = boot_go(&rsp);
