@@ -163,7 +163,7 @@ static uint16_t hidEmuConnHandle = GAP_CONNHANDLE_INIT;
  */
 
 static void    hidEmu_ProcessTMOSMsg(tmos_event_hdr_t *pMsg);
-static void    hidEmuSendKbdReport(report_keyboard_t *report);
+void    hidEmuSendKbdReport(report_keyboard_t *report);
 static uint8_t hidEmuRcvReport(uint8_t len, uint8_t *pData);
 static uint8_t hidEmuRptCB(uint8_t id, uint8_t type, uint16_t uuid,
                            uint8_t oper, uint16_t *pLen, uint8_t *pData);
@@ -308,46 +308,46 @@ uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events)
 
     if(events & START_REPORT_EVT)
     {
-        tmos_memset(scan_buf, 0, 6);
-        scan_flag = get_key_fanz(scan_buf);
-        if (tmos_memcmp(last_buf,scan_buf,6) == TRUE) {
-            if (scan_flag == 0) {
-                change_mode_USB = 0;
-                change_mode_24 = 0;
-            }
-            else if (scan_flag == 1) {
-                if (scan_buf[0]==key_data_buf[1][0]) {
-                    //USB MODE
-                    change_mode_USB++;
-                }
-                else if (scan_buf[0]==key_data_buf[1][2]) {
-                    //2.4 MODE
-                    change_mode_24++;
-                }
-                else {
+        // tmos_memset(scan_buf, 0, 6);
+        // scan_flag = get_key_fanz(scan_buf);
+        // if (tmos_memcmp(last_buf,scan_buf,6) == TRUE) {
+        //     if (scan_flag == 0) {
+        //         change_mode_USB = 0;
+        //         change_mode_24 = 0;
+        //     }
+        //     else if (scan_flag == 1) {
+        //         if (scan_buf[0]==key_data_buf[1][0]) {
+        //             //USB MODE
+        //             change_mode_USB++;
+        //         }
+        //         else if (scan_buf[0]==key_data_buf[1][2]) {
+        //             //2.4 MODE
+        //             change_mode_24++;
+        //         }
+        //         else {
 
-                }
-            }
-        }
-        else {
-            change_mode_USB = 0;
-            change_mode_24 = 0;
-            hidEmuSendKbdReport(scan_buf);
-        }
-        tmos_memcpy(last_buf,scan_buf,6);
-        if (change_mode_USB == 375) {
-            uint8_t key[1] = {0x0B};
-            FLASH_DATA_VIAL_WITE_mode(key);
-            DelayMs(1);
-            SYS_ResetExecute();
-        }
-        if (change_mode_24 == 375) {
-            uint8_t key[1] = {0x24};
-            FLASH_DATA_VIAL_WITE_mode(key);
-            DelayMs(1);
-            SYS_ResetExecute();
-        }
-        tmos_start_task(hidEmuTaskId, START_REPORT_EVT, 8);
+        //         }
+        //     }
+        // }
+        // else {
+        //     change_mode_USB = 0;
+        //     change_mode_24 = 0;
+        //     hidEmuSendKbdReport(scan_buf);
+        // }
+        // tmos_memcpy(last_buf,scan_buf,6);
+        // if (change_mode_USB == 375) {
+        //     uint8_t key[1] = {0x0B};
+        //     FLASH_DATA_VIAL_WITE_mode(key);
+        //     DelayMs(1);
+        //     SYS_ResetExecute();
+        // }
+        // if (change_mode_24 == 375) {
+        //     uint8_t key[1] = {0x24};
+        //     FLASH_DATA_VIAL_WITE_mode(key);
+        //     DelayMs(1);
+        //     SYS_ResetExecute();
+        // }
+        // tmos_start_task(hidEmuTaskId, START_REPORT_EVT, 8);
         return (events ^ START_REPORT_EVT);
     }
     return 0;
@@ -380,18 +380,18 @@ static void hidEmu_ProcessTMOSMsg(tmos_event_hdr_t *pMsg)
  *
  * @return  none
  */
-static void hidEmuSendKbdReport(report_keyboard_t *report)
+void hidEmuSendKbdReport(report_keyboard_t *report)
 {
     uint8_t buf[HID_KEYBOARD_IN_RPT_LEN];
 
     buf[0] = report->mods;       // Modifier keys
     buf[1] = report->reserved;       // Reserved
-    buf[2] = report->keycode[0];       // Keycode 1
-    buf[3] = report->keycode[1];       // Keycode 2
-    buf[4] = report->keycode[2];       // Keycode 3
-    buf[5] = report->keycode[3];       // Keycode 4
-    buf[6] = report->keycode[4];       // Keycode 5
-    buf[7] = report->keycode[5];       // Keycode 6
+    buf[2] = report->keys[0];       // Keycode 1
+    buf[3] = report->keys[1];       // Keycode 2
+    buf[4] = report->keys[2];       // Keycode 3
+    buf[5] = report->keys[3];       // Keycode 4
+    buf[6] = report->keys[4];       // Keycode 5
+    buf[7] = report->keys[5];       // Keycode 6
 
     HidDev_Report(HID_RPT_ID_KEY_IN, HID_REPORT_TYPE_INPUT,
                   HID_KEYBOARD_IN_RPT_LEN, buf);

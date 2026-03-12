@@ -41,9 +41,9 @@ int8_t sendchar(uint8_t c)
 bool shutdown_kb(bool jump_to_bootloader)
 {
     rgbled_power_off();
-#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
-    wireless_indicator_status_reset();
-#endif
+// #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+//     wireless_indicator_status_reset();
+// #endif
 
 #ifdef ENCODER_ENABLE
     pin_t encoders_pad_a[] = ENCODER_A_PINS, encoders_pad_b[] = ENCODER_B_PINS;

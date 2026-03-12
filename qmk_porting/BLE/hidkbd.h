@@ -13,6 +13,8 @@
 #ifndef HIDKBD_H
 #define HIDKBD_H
 
+#include "report.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -198,8 +198,8 @@ if(BUILD_WIRELESS_LIB)
     include(${WIRELESS_SUBMODULE_PATH}/gen_lib.cmake)
 else()
     if(NOT ESB_ENABLE OR(ESB_ENABLE AND ESB_ROLE STREQUAL "keyboard"))
-        set(WIRELESS_LIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB)
-        set(WIRELESS_LIB_FILE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB/LIBCH58xBLE.a)
+        # set(WIRELESS_LIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB)
+        # set(WIRELESS_LIB_FILE ${CMAKE_CURRENT_LIST_DIR}/sdk/BLE_LIB/LIBCH58xBLE.a)
         set(HEX_FILE_APP ${PROJECT_BINARY_DIR}/${keyboard}.hex)
         set(HEX_FILE_APP_SIGNED ${PROJECT_BINARY_DIR}/${keyboard}_signed.hex)
         set(BIN_FILE_APP ${PROJECT_BINARY_DIR}/${keyboard}.bin)
@@ -231,6 +231,7 @@ else()
         target_sources(mcuboot_porting INTERFACE
         ${bootutil_sources}
         "${CMAKE_CURRENT_LIST_DIR}/mcuboot_porting/mcuboot_port.c"
+        "${CMAKE_CURRENT_LIST_DIR}/mcuboot/boot/cypress/MCUBootApp/keys.c"
     )
     target_link_libraries(mcuboot_porting INTERFACE mbedtls)
     target_link_libraries(mcuboot_porting INTERFACE CH582_IAP)
@@ -313,14 +314,14 @@ else()
         ${PROJECT_SOURCE_DIR}/qmk_porting/protocol/pre_handler.h
     )
 
-    if(BLE_ENABLE OR(ESB_ENABLE AND((ESB_ROLE STREQUAL "keyboard") OR(ESB_ROLE STREQUAL "dongle"))))
-        add_library(wireless_lib STATIC IMPORTED)
-        set_property(TARGET wireless_lib PROPERTY IMPORTED_LOCATION ${WIRELESS_LIB_FILE})
-        target_include_directories(wireless_lib INTERFACE ${WIRELESS_LIB_INCLUDE})
+    # if(BLE_ENABLE OR(ESB_ENABLE AND((ESB_ROLE STREQUAL "keyboard") OR(ESB_ROLE STREQUAL "dongle"))))
+    #     add_library(wireless_lib STATIC IMPORTED)
+    #     set_property(TARGET wireless_lib PROPERTY IMPORTED_LOCATION ${WIRELESS_LIB_FILE})
+    #     target_include_directories(wireless_lib INTERFACE ${WIRELESS_LIB_INCLUDE})
 
-        target_link_libraries(${keyboard}.elf PUBLIC wireless_lib)
-        target_link_libraries(${keyboard}_IAP.elf PUBLIC wireless_lib)
-    endif()
+    #     target_link_libraries(${keyboard}.elf PUBLIC wireless_lib)
+    #     target_link_libraries(${keyboard}_IAP.elf PUBLIC wireless_lib)
+    # endif()
 
     add_custom_command(TARGET ${keyboard}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${keyboard}.elf> ${HEX_FILE_APP}
@@ -331,16 +332,16 @@ else()
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${keyboard}_IAP.elf> ${BIN_FILE_IAP}
     )
 
-    if((BLE_ENABLE OR(ESB_ENABLE AND((ESB_ROLE STREQUAL "keyboard") OR(ESB_ROLE STREQUAL "dongle"))))
-        AND WIRELESS_SUBMODULE_PATH
-        AND EXISTS "${WIRELESS_SUBMODULE_PATH}/post_build.cmake")
-        include(${WIRELESS_SUBMODULE_PATH}/post_build.cmake)
-    else()
+    # if((BLE_ENABLE OR(ESB_ENABLE AND((ESB_ROLE STREQUAL "keyboard") OR(ESB_ROLE STREQUAL "dongle"))))
+    #     AND WIRELESS_SUBMODULE_PATH
+    #     AND EXISTS "${WIRELESS_SUBMODULE_PATH}/post_build.cmake")
+    #     include(${WIRELESS_SUBMODULE_PATH}/post_build.cmake)
+    # else()
         add_custom_target(post_build ALL
             COMMAND python3 ${PROJECT_SOURCE_DIR}/mcuboot/scripts/imgtool.py sign --header-size 0x1000 --align 4 --slot-size 0x5e000 --version 1.0.0 --pad-header ${HEX_FILE_APP} ${HEX_FILE_APP_SIGNED}
             COMMAND python3 ${PROJECT_SOURCE_DIR}/utils/uf2conv.py ${HEX_FILE_APP_SIGNED} -c -f ${UF2_FAMILY} -o ${UF2_FILE_APP}
             COMMAND ${MERGEHEX_PATH} --merge ${HEX_FILE_APP_SIGNED} ${HEX_FILE_IAP} --output ${HEX_FILE_FACTORY}
             DEPENDS ${keyboard}.elf ${keyboard}_IAP.elf
         )
-    endif()
+    # endif()
 endif()

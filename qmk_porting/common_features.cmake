@@ -503,7 +503,7 @@ if(BLE_ENABLE)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/../sdk/HAL/include)
     list(APPEND QMK_PORTING_SOURCES
         "${CMAKE_CURRENT_LIST_DIR}/protocol/protocol_ble.c"
-        "${CMAKE_CURRENT_LIST_DIR}/BLE/hidbed.c"
+        "${CMAKE_CURRENT_LIST_DIR}/BLE/hidkbd.c"
         "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/battservice.c"
         "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/devinfoservice.c"
         "${CMAKE_CURRENT_LIST_DIR}/BLE/Profile/hiddev.c"

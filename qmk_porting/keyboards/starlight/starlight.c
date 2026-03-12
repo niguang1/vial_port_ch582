@@ -18,6 +18,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+bool wireless_pre_process_record_kb(uint16_t keycode, keyrecord_t *record)
+{
+    return true;
+}
+bool wireless_process_record(uint16_t keycode, keyrecord_t *record)
+{
+    return true;
+}
+
+bool process_ble_passcode(uint16_t keycode, keyrecord_t * record)
+{
+    return true;
+}
+#endif
+
 const uint32_t PROGMEM unicode_map[] = {
     // [la] = 0x03B1, // α
     // [lA] = 0x0307, //
