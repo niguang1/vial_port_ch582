@@ -1,0 +1,4 @@
+./mcuboot/scripts/imgtool.py keygen -k my.pem -t rsa-2048
+./mcuboot/scripts/imgtool.py getpub -k my.pem >> mcuboot_porting/autogen-pubkey.c
+
+给这个宏关掉看能不能启动MCUBOOT_VALIDATE_PRIMARY_SLOT
