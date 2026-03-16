@@ -1,4 +1,48 @@
+
+rm -rf ./* && clear
+cmake -Dkeyboard=starlight -Dkeymap=default -DCMAKE_BUILD_TYPE=Release ..
+
 ./mcuboot/scripts/imgtool.py keygen -k my.pem -t rsa-2048
 ./mcuboot/scripts/imgtool.py getpub -k my.pem >> mcuboot_porting/autogen-pubkey.c
 
 给这个宏关掉看能不能启动MCUBOOT_VALIDATE_PRIMARY_SLOT
+
+
+
+
+
+
+
+
+Bootloader 2667a94e-dirty
+Reason of last reset:  Manual
+Battery level: 100
+Bootmagic not allowed
+Before jump
+Initializing a new keyboard, default to USB.
+Failed searching for a bootable image.
+
+
+
+
+
+
+
+
+
+
+
+
+cd /media/frances/work/my/ch582-keyboard/Toolchain/MRS_Toolchain_Linux_x64_V1.70/
+./beforeinstall/start.sh
+
+cd OpenOCD/bin/
+sudo ./openocd -f  wch-riscv.cfg
+
+
+新终端
+cd /media/frances/work/my/ch582-keyboard/Toolchain/MRS_Toolchain_Linux_x64_V1.70/RISC-V\ Embedded\ GCC/bin
+sudo ./[GDB_PATH]/riscv-none-embed-gdb
+
+file /media/frances/work/my/ch582-keyboard/qmk_port_ch582/build/starlight.elf
+

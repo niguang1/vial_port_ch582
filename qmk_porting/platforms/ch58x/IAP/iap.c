@@ -511,9 +511,10 @@ int main()
     // check if there is any existing bootmagic pin setting
     do {
         if (!bootmagic_allow_jump()) {
+            PRINT("Bootmagic not allowed\n");
             break;
         }
-
+        PRINT("Bootmagic allowed\n");
         uint8_t buffer[2], ret;
 
         do {
@@ -564,6 +565,8 @@ int main()
             retention_register_set_iap();
         }
     } while (0);
+
+    PRINT("Before jump\n");
 
     iap_decide_jump(false);
 #else
