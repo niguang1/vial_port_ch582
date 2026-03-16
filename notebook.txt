@@ -9,7 +9,7 @@ cmake -Dkeyboard=starlight -Dkeymap=default -DCMAKE_BUILD_TYPE=Release ..
 
 
 
-
+./mcuboot/scripts/imgtool.py verify build/starlight_signed.hex
 
 
 
@@ -22,15 +22,84 @@ Before jump
 Initializing a new keyboard, default to USB.
 Failed searching for a bootable image.
 
+iap_decide_jump(uint8_t need_cleanup) -> iap_jump_app(need_cleanup);
+
+Bootloader 52a96904-dirty
+Reason of last reset:  Power on
+Initializing a new keyboard, default to USB.
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D_MCB]flash_area_open: ID=2, OK
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=1
+[E_MCB]Unexpected Request: image_index=0, slot=1
+[D_MCB]flash_area_open: ID=255, fail
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D_MCB]flash_area_open: ID=2, OK
+[D_MCB]flash_area_read: Addr: 0x00012000 Length: 32
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=1
+[E_MCB]Unexpected Request: image_index=0, slot=1
+[D_MCB]flash_area_open: ID=255, fail
+[I_MCB]Primary   slot: version=1.0.0+0
+[I_MCB]Image 0 Secondary slot: Image not found
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D_MCB]flash_area_open: ID=2, OK
+[D_MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D_MCB]flash_area_open: ID=2, OK
+[D_MCB]flash_area_read: Addr: 0x00012000 Length: 256
+[D_MCB]flash_area_read: Addr: 0x00012100 Length: 256
+[D_MCB]flash_area_read: Addr: 0x00012200 Length: 256
+...
+[D_MCB]flash_area_read: Addr: 0x00021a00 Length: 256
+[D_MCB]flash_area_read: Addr: 0x00021b00 Length: 256
+[D_MCB]flash_area_read: Addr: 0x00021c00 Leeprom_driver_init
+eeprom_driver_erase
 
 
 
 
 
 
+Bootloader f75a4d9f-dirty
+Reason of last reset:  Power on
+Battery level: 100
+Bootmagic not allowed
+ Before jump
+Initializing a new keyboard, default to USB.
+[D__MCB]boot_go enter...
 
-
-
+[D__MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D__MCB]flash_area_open: ID=2, OK
+[D__MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=1
+[E__MCB]Unexpected Request: image_index=0,slot=1
+[D__MCB]flash_area_open: ID=255, fail
+[D__MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D__MCB]flash_area_open: ID=2, OK
+[D__MCB]flash_area_read: Addr: 0x00012000 Length:32
+[D__MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=1
+[E__MCB]Unexpected Request:image_index=0, slot=1
+[D__MCB]flash_area_open: ID=255, fail
+[I__MCB]Primary   slot: version=1.0.0+0
+[I__MCB]Image 0 Secondary slot: Image not found
+[D__MCB]flash_area_id_from_multi_image_slot: image_index=0, slot=0
+[D__MCB]flash_area_open: ID=2, OK
+[D__MCB]flash_area_id_from_multi_image_slot:image_index=0, slot=0
+[D__MCB]flash_area_open: ID=2, OK
+[D__MCB]flash_area_read: Addr: 0x00012000 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00012100 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00012200 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00012300 Length: 256
+...
+[D__MCB]flash_area_read: Addr: 0x00045700 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00045800 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00045900 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00045a00 Length: 256
+[D__MCB]flash_area_read: Addr: 0x00045b00 Length: 32
+[D__MCB]flash_area_read: Addr: 0x00045b20 Length: 4
+[D__MCB]flash_area_read: Addr: 0x00045b24 Length: 4
+[D__MCB]flash_area_read: Addr: 0x00045b28 Length: 32
+[D__MCB]flash_area_erase:Addr: 0x00012000 Length: 385024
+[E__MCB]Image in the primary slot is not valid!
+[I__MCB]No slot toload for image 0
+Failed searching for a bootable image.
 
 
 cd /media/frances/work/my/ch582-keyboard/Toolchain/MRS_Toolchain_Linux_x64_V1.70/

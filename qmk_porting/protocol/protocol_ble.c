@@ -32,12 +32,12 @@ extern void    hidEmuSendKbdReport(report_keyboard_t *report);
 
 static void send_keyboard(report_keyboard_t *report)
 {
+    PRINT("Sending keyboard report\r\n");
     if (!keyboard_protocol) {
         hid_keyboard_send_report(KEYBOARD_MODE_BIOS, &report->mods, 8);
     } else {
-        hid_keyboard_send_report(KEYBOARD_MODE_BIOS, (uint8_t *)report, KEYBOARD_REPORT_SIZE);
+        PRINT("Sending keyboard report 1\r\n");
         hidEmuSendKbdReport(report);
-
     }
 }
 
