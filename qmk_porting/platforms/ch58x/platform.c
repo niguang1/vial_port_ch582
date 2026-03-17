@@ -71,7 +71,7 @@ void platform_setup()
 #endif
 #ifdef PLF_DEBUG
     DBG_INIT;
-    PRINT("App " MACRO2STR(__GIT_VERSION__) ", build on %s\n", QMK_BUILDDATE);
+    PRINT("App " MACRO2STR(__GIT_VERSION__) ", build on %s\r\n", QMK_BUILDDATE);
 #else
     gpio_write_pin_high(A9);
     gpio_set_pin_output(A9);
@@ -80,7 +80,7 @@ void platform_setup()
     UART1_BaudRateCfg(DEBUG_BAUDRATE);
 
     char buffer[UINT8_MAX];
-    uint8_t len = sprintf(buffer, "App " MACRO2STR(__GIT_VERSION__) ", build on %s\n", QMK_BUILDDATE);
+    uint8_t len = sprintf(buffer, "App " MACRO2STR(__GIT_VERSION__) ", build on %s\r\n", QMK_BUILDDATE);
 
     while (len) {
         if (R8_UART1_TFC != UART_FIFO_SIZE) {

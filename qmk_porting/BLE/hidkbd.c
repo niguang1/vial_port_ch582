@@ -21,6 +21,14 @@
 #include "hidkbd.h"
 #include "report.h"
 
+#include "protocol_supplement.h"
+#include "wait.h"
+#include "HAL.h"
+
+static uint8_t bleTaskId = INVALID_TASK_ID;
+extern void suspend_power_down_quantum();
+extern void suspend_wakeup_init_quantum();
+
 /*********************************************************************
  * MACROS
  */
@@ -347,7 +355,7 @@ uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events)
         //     DelayMs(1);
         //     SYS_ResetExecute();
         // }
-        // tmos_start_task(hidEmuTaskId, START_REPORT_EVT, 8);
+        tmos_start_task(hidEmuTaskId, START_REPORT_EVT, 8);
         return (events ^ START_REPORT_EVT);
     }
     return 0;
@@ -570,3 +578,25 @@ static void hidEmuEvtCB(uint8_t evt)
 
 /*********************************************************************
 *********************************************************************/
+
+static uint16_t ble_ProcessEvent(uint8_t task_id, uint16_t events)
+{
+    if (events & BLE_RUN_QMK_TASK_EVT) {
+
+        run_qmk_task();
+
+        keyboard_check_protocol_mode();
+
+        tmos_start_task(task_id, BLE_RUN_QMK_TASK_EVT, 0);
+
+        return (events ^ BLE_RUN_QMK_TASK_EVT);
+    }
+
+    return 0;
+}
+
+void ble_task_init()
+{
+    bleTaskId = TMOS_ProcessEventRegister(ble_ProcessEvent);
+    tmos_start_task(bleTaskId, BLE_RUN_QMK_TASK_EVT, 0);
+}

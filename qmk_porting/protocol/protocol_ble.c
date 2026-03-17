@@ -36,48 +36,47 @@ static void send_keyboard(report_keyboard_t *report)
     if (!keyboard_protocol) {
         hid_keyboard_send_report(KEYBOARD_MODE_BIOS, &report->mods, 8);
     } else {
-        PRINT("Sending keyboard report 1\r\n");
         hidEmuSendKbdReport(report);
     }
 }
 
 static void send_nkro(report_nkro_t *report)
 {
-    hid_keyboard_send_report(KEYBOARD_MODE_NKRO, (uint8_t *)report, EXKEY_IN_EP_SIZE);
+    // hid_keyboard_send_report(KEYBOARD_MODE_NKRO, (uint8_t *)report, EXKEY_IN_EP_SIZE);
 }
 
 static void send_mouse(report_mouse_t *report)
 {
-#ifdef MOUSE_ENABLE
-    uint8_t report_to_send[6];
+// #ifdef MOUSE_ENABLE
+//     uint8_t report_to_send[6];
 
-    report_to_send[0] = REPORT_ID_MOUSE;
-    memcpy(report_to_send + 1, report, 5);
-    hid_exkey_send_report(report_to_send, 6);
-#endif
+//     report_to_send[0] = REPORT_ID_MOUSE;
+//     memcpy(report_to_send + 1, report, 5);
+//     hid_exkey_send_report(report_to_send, 6);
+// #endif
 }
 
 static void send_extra(report_extra_t *report)
 {
-    hid_exkey_send_report((uint8_t *)report, sizeof(report_extra_t));
+    // hid_exkey_send_report((uint8_t *)report, sizeof(report_extra_t));
 }
 
 #ifdef RAW_ENABLE
 static void send_qmk_raw(uint8_t *data, uint8_t length)
 {
-    hid_qmk_raw_send_report(data, length);
+    // hid_qmk_raw_send_report(data, length);
 }
 #endif
 
 #ifdef RGB_RAW_ENABLE
 static void send_rgb_raw(uint8_t *data, uint8_t length)
 {
-    hid_rgb_raw_send_report(data, length);
+    // hid_rgb_raw_send_report(data, length);
 }
 
 static void control_send_rgb_raw(uint8_t report_id, uint8_t **data, uint32_t *len)
 {
-    dynamic_lighting_handle_get_report(report_id, data, len);
+    // dynamic_lighting_handle_get_report(report_id, data, len);
 }
 #endif
 
@@ -95,14 +94,16 @@ static void platform_initialize()
 
 static void protocol_setup()
 {
+    PRINT("BLE protocol_setup\r\n");
     GAPRole_PeripheralInit();
     HidDev_Init();
     HidEmu_Init();
+    ble_task_init();
 }
 
 static void protocol_init()
 {
-    init_usb_driver();
+    // init_usb_driver();
 }
 
 static void platform_reboot()

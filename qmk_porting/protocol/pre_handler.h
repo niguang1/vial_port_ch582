@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef DEBUG
 #include <stdio.h>
 #include "printf.h"
+
 #define PRINT(X...) printf(X)
 #ifndef DEBUG_BAUDRATE
 #define DEBUG_BAUDRATE 460800

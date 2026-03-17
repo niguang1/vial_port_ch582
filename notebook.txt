@@ -12,6 +12,23 @@ cmake -Dkeyboard=starlight -Dkeymap=default -DCMAKE_BUILD_TYPE=Release ..
 ./mcuboot/scripts/imgtool.py verify build/starlight_signed.hex
 
 
+host_set_driver
+raw_hid_send
+
+keyboard_check_protocol_mode
+send_6kro_report
+
+quantum main()->protocol_keyboard_task->keyboard_task->
+matrix_task->action_exec->process_record->process_record_handler
+
+process_action->send_keyboard_report->send_nkro_report/send_6kro_report->
+host_nkro_send/host_keyboard_send->driver->send_keyboard
+hid_listen.exe
+
+
+#define xprintf(format, ...) __xprintf(PSTR(format), ##__VA_ARGS__)
+#define xsprintf(str, format, ...) __xsprintf(str, PSTR(format), ##__VA_ARGS__)
+#define xfprintf(func, format, ...) __xfprintf(func, PSTR(format), ##__VA_ARGS__)
 
 
 Bootloader 2667a94e-dirty

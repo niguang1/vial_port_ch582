@@ -292,7 +292,6 @@ uint8_t HidDev_Report(uint8_t id, uint8_t type, uint8_t len, uint8_t *pData)
     // if connected
     if(hidDevGapState == GAPROLE_CONNECTED)
     {
-        PRINT("BLE state connected\r\n");
         // if connection is secure
         if(hidDevConnSecure)
         {
