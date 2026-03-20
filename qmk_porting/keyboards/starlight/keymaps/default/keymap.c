@@ -23,8 +23,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                      KC_Z, KC_X, KC_C, KC_V, KC_B, KC_N, KC_M, KC_COMM, KC_DOT, KC_ENT,
                      MO(1),KC_LSFT, KC_LGUI, KC_LALT, KC_SPC, KC_SPC, KC_LPRN, KC_RPRN, KC_QUOT, KC_RCTL),
     [1] = LAYOUT_all(/* 1: fn */
-                     _______, _______, _______, KC_KP_1, KC_KP_2, KC_KP_3, KC_PAST, KC_PPLS, KC_PEQL, _______,
-                     _______, _______, _______, KC_KP_4, KC_KP_5, KC_KP_6, KC_NUHS, KC_PMNS, _______, _______,
+                     USB_MODE, BLE_SLOT0, BLE_SLOT1, KC_KP_1, KC_KP_2, KC_KP_3, KC_PAST, KC_PPLS, KC_PEQL, _______,
+                     BLE_ALL_CLEAR, _______, _______, KC_KP_4, KC_KP_5, KC_KP_6, KC_NUHS, KC_PMNS, _______, _______,
                      _______, _______, _______, KC_KP_7, KC_KP_8, KC_KP_9, KC_KP_0, KC_SCLN, KC_SCLN, _______,
                      _______, _______, _______, KC_PSLS, _______, _______, KC_9,    KC_0,    KC_7,    _______),
 

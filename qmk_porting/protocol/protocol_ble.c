@@ -90,6 +90,8 @@ static void platform_initialize()
     gpio_set_pin_input_low(A8);
     gpio_set_pin_input_low(A9);
 #endif
+    CH58X_BLEInit();
+    HAL_Init();
 }
 
 static void protocol_setup()

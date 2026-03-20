@@ -120,17 +120,9 @@ void platform_setup()
 
     bootloader_select_boot_mode();
 
-    CH58X_BLEInit();
-    HAL_Init();
-
     ch582_interface_t *interface = ch582_get_protocol_interface();
 
     if (interface) {
         interface->ch582_platform_initialize();
     }
-#ifdef BLE_ENABLE
-    if (kbd_protocol_type != kbd_protocol_ble) {
-        ch582_protocol_ble.ch582_protocol_setup();
-    }
-#endif
 }
