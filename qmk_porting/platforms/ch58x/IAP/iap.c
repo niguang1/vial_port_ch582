@@ -275,10 +275,9 @@ __HIGH_CODE _PUTCHAR_CLAIM;
 __HIGH_CODE static void iap_handle_new_chip()
 {
 #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
-    extern void iap_handle_new_wireless_chip();
+    extern void iap_handle_fresh_wireless_chip();
 
-    // iap_handle_new_wireless_chip();
-    bootloader_set_to_default_mode("Initializing a new keyboard");
+    iap_handle_fresh_wireless_chip();
 #else
     bootloader_set_to_default_mode("Initializing a new keyboard");
 #endif

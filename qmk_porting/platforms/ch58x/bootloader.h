@@ -46,3 +46,7 @@ void bootloader_select_boot_mode();
 uint8_t bootloader_set_to_default_mode(const char *reason);
 void bootloader_jump();
 void mcu_reset();
+
+#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+void iap_handle_fresh_wireless_chip();
+#endif

@@ -25,9 +25,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 volatile uint8_t kbd_protocol_type = 0;
 #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
 extern void wireless_indicator_status_reset();
-#else
 __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
+
+#if(defined(BLE_MAC)) && (BLE_MAC == TRUE)
+uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
+
+#endif
+
 
 __HIGH_CODE _PUTCHAR_CLAIM;
 

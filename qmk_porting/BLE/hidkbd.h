@@ -36,7 +36,13 @@ extern "C" {
 /*********************************************************************
  * MACROS
  */
+typedef struct{
+    bool isbond;
+    uint8_t remote_addr_type;
+    uint8_t remote_addr[6];
+} DeviceID_t;
 
+extern DeviceID_t mydevinfo;
 /*********************************************************************
  * FUNCTIONS
  */
@@ -54,6 +60,8 @@ extern void HidEmu_Init(void);
  * Task Event Processor for the BLE Application
  */
 extern uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events);
+
+void connectAnotherDevice();
 
 /*********************************************************************
 *********************************************************************/

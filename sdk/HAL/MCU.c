@@ -14,7 +14,6 @@
 /* 头文件包含 */
 #include "HAL.h"
 
-__attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 tmosTaskID halTaskID;
 
 /*******************************************************************************

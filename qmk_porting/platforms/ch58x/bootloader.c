@@ -205,3 +205,10 @@ void mcu_reset()
     }
 #endif
 }
+
+#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+void iap_handle_fresh_wireless_chip()
+{
+    bootloader_set_to_default_mode("Initializing a new keyboard");
+}
+#endif

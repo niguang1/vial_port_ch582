@@ -28,6 +28,9 @@
 static uint8_t bleTaskId = INVALID_TASK_ID;
 extern void suspend_power_down_quantum();
 extern void suspend_wakeup_init_quantum();
+DeviceID_t mydevinfo;
+uint8_t devAddr[6];
+uint8_t devAddrType;
 
 /*********************************************************************
  * MACROS
@@ -210,6 +213,7 @@ void HidEmu_Init()
 {
     hidEmuTaskId = TMOS_ProcessEventRegister(HidEmu_ProcessEvent);
 
+#if 0 
     // Setup the GAP Peripheral Role Profile
     {
         uint8_t initial_advertising_enable = TRUE;
@@ -219,6 +223,28 @@ void HidEmu_Init()
 
         GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);
         GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);
+    }
+#endif
+    uint8_t initial_advertising_enable = TRUE;
+
+    uint16 advInt =32; //0.625us * 32 = 20ms,20ms一包广播包
+    GAP_SetParamValue(TGAP_DISC_ADV_INT_MIN, advInt);
+    GAP_SetParamValue(TGAP_DISC_ADV_INT_MAX, advInt);
+
+    GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);   //设置广播包
+    GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);  //设置扫描应答包
+
+    if(mydevinfo.isbond)  //已经完成配对，mydevinfo.isbond这标志为1
+    {
+        uint8 syncWL = TRUE;
+        GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
+        uint8 filter_policy = GAP_FILTER_POLICY_WHITE;      //只允许白名单设备扫描和连接，GAP_FILTER_POLICY_WHITE表示只有在白名单中的设备才能进行扫描和连接。
+        GAPRole_SetParameter( GAPROLE_ADV_FILTER_POLICY, sizeof( uint8 ), &filter_policy );//设置白名单，广播数据只能被白名单中的设备进行扫描到
+    }
+    else
+    {
+        uint8_t policy = GAP_FILTER_POLICY_ALL;     //GAP_FILTER_POLICY_ALL表示不进行过滤，任何设备都可以扫描和连接
+        GAPRole_SetParameter(GAPROLE_ADV_FILTER_POLICY, sizeof(policy), &policy);  //意味着设备的广播数据可以被所有设备接受，不进行过滤
     }
 
     // Set the GAP Characteristics
@@ -361,6 +387,48 @@ uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events)
     return 0;
 }
 
+// 递增 MAC 地址的函数
+static void IncrementMacAddress(void)
+{
+    uint8_t i;
+    uint8_t carry = 1; // 进位标志
+
+    // 从最低位开始递增
+    for (i = 5; i > 0; i--)
+    {
+        if (carry)
+        {
+            MacAddr[i]++;
+            if (MacAddr[i] == 0)
+            {
+                carry = 1; // 继续进位
+            }
+            else
+            {
+                carry = 0; // 递增完成
+            }
+        }
+    }
+}
+
+void connectAnotherDevice()
+{
+    mydevinfo.isbond = 0;
+    GAPRole_TerminateLink(hidEmuConnHandle);   //断开当前连接
+    IncrementMacAddress();   // 递增 MAC 地址的函数
+    printf("Updated MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+            MacAddr[0], MacAddr[1], MacAddr[2],
+            MacAddr[3], MacAddr[4], MacAddr[5]);
+
+    CH58X_BLEInit();
+    HAL_Init();
+    GAPRole_PeripheralInit();
+    HidDev_Init();
+    HidEmu_Init();
+
+    uint8_t initial_advertising_enable = TRUE;    //定义广播开启
+    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);  //开启广播
+}
 /*********************************************************************
  * @fn      hidEmu_ProcessTMOSMsg
  *
@@ -443,6 +511,8 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 hidEmuConnHandle = event->connectionHandle;
                 tmos_start_task(hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY);
                 PRINT("Connected..\n");
+                tmos_memcpy(devAddr, event->devAddr, 6);//获取设备地址
+                devAddrType = event->devAddrType;//获取设备地址类型
             }
             break;
 
@@ -466,11 +536,25 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
             {
                 PRINT("Advertising timeout..\n");
             }
+            #if 0 
             // Enable advertising
             {
                 uint8_t initial_advertising_enable = TRUE;
                 // Set the GAP Role Parameters
                 GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+            }
+            #endif
+            if(mydevinfo.isbond)  //已经完成配对，mydevinfo.isbond这标志为1
+            {
+                uint8 syncWL = TRUE;
+                GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
+                uint8 filter_policy = GAP_FILTER_POLICY_WHITE;      //只允许白名单设备扫描和连接，GAP_FILTER_POLICY_WHITE表示只有在白名单中的设备才能进行扫描和连接。
+                GAPRole_SetParameter( GAPROLE_ADV_FILTER_POLICY, sizeof( uint8 ), &filter_policy );//设置白名单，广播数据只能被白名单中的设备进行扫描到
+            }
+            else
+            {
+                uint8_t policy = GAP_FILTER_POLICY_ALL;     //GAP_FILTER_POLICY_ALL表示不进行过滤，任何设备都可以扫描和连接
+                GAPRole_SetParameter(GAPROLE_ADV_FILTER_POLICY, sizeof(policy), &policy);  //意味着设备的广播数据可以被所有设备接受，不进行过滤
             }
             break;
 
