@@ -96,6 +96,24 @@ static void platform_initialize()
     uint8_t data_buf[(sizeof(g_device_info) / 4 + (size_t)(sizeof(g_device_info) % 4 ? 1 : 0)) * 4];
     EEPROM_READ(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET, data_buf, sizeof(g_device_info));
     memcpy(&g_device_info, data_buf, sizeof(g_device_info));
+
+    if(g_device_info.bondIdx == 255)
+    {
+        g_device_info.bondIdx = 0;
+    }
+
+    PRINT("+++++++++++++++++++++++++++Device Info: \r\n");
+    PRINT("bondIdx: %d\r\n", g_device_info.bondIdx);
+
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        PRINT("ID %d isbond:%d \r\n", i, g_device_info.ID[i].isbond);
+        PRINT("ID addr type:%d \r\n", g_device_info.ID[i].addr_type);
+        PRINT("ID MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+            g_device_info.ID[i].MacAddr[0], g_device_info.ID[i].MacAddr[1], g_device_info.ID[i].MacAddr[2],
+            g_device_info.ID[i].MacAddr[3], g_device_info.ID[i].MacAddr[4], g_device_info.ID[i].MacAddr[5]);
+    }
+    PRINT("+++++++++++++++++++++++++++Device Info: \r\n");    
 }
 
 static void protocol_setup()

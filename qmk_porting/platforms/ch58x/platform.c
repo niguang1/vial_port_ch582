@@ -57,7 +57,9 @@ bool wireless_process_record(uint16_t keycode, keyrecord_t *record)
         {
             GAPBondMgr_SetParameter(GAPBOND_ERASE_ALLBONDS, 0, NULL);
 
+            EEPROM_ERASE(BLE_SNV_ADDR, EEPROM_PAGE_SIZE*BLE_SNV_NUM);
             EEPROM_ERASE(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET, EEPROM_PAGE_SIZE);
+            soft_reset_keyboard();
             return false;
         }
     }

@@ -224,28 +224,48 @@ void HidEmu_Init()
         GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);
     }
 #endif
-    uint8_t initial_advertising_enable = TRUE;
-
-    uint16 advInt =32; //0.625us * 32 = 20ms,20ms一包广播包
-    GAP_SetParamValue(TGAP_DISC_ADV_INT_MIN, advInt);
-    GAP_SetParamValue(TGAP_DISC_ADV_INT_MAX, advInt);
+#if 1
+    uint8_t initial_advertising_enable = TRUE;  
 
     GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);   //设置广播包
     GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);  //设置扫描应答包
 
-    if(g_device_info.ID[g_device_info.bondIdx].isbond)  //已经完成配对，mydevinfo.isbond这标志为1
+    PRINT("+++++++++++init++++++++++++\r\n");
+    PRINT("Init use index:%d\r\n", g_device_info.bondIdx);
+    PRINT("ID isbond: %d\r\n", g_device_info.ID[g_device_info.bondIdx].isbond);
+    PRINT("ID MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        g_device_info.ID[g_device_info.bondIdx].MacAddr[0], g_device_info.ID[g_device_info.bondIdx].MacAddr[1], g_device_info.ID[g_device_info.bondIdx].MacAddr[2],
+        g_device_info.ID[g_device_info.bondIdx].MacAddr[3], g_device_info.ID[g_device_info.bondIdx].MacAddr[4], g_device_info.ID[g_device_info.bondIdx].MacAddr[5]);
+    
+    
+    uint8_t bondCount;
+    GAPBondMgr_GetParameter(GAPBOND_BOND_COUNT, &bondCount);
+    PRINT("Bond count: %d\r\n", bondCount);
+    PRINT("+++++++++++init++++++++++++\r\n");
+    
+    GAPBondMgr_SetParameter(GAPBOND_ENABLE_ALLBONDS ,0, NULL);
+    for(uint8_t index = 0; index < BLE_SNV_NUM; index++)
     {
-        uint8 syncWL = TRUE;
-        GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
-        uint8 filter_policy = GAP_FILTER_POLICY_WHITE;      //只允许白名单设备扫描和连接，GAP_FILTER_POLICY_WHITE表示只有在白名单中的设备才能进行扫描和连接。
-        GAPRole_SetParameter( GAPROLE_ADV_FILTER_POLICY, sizeof( uint8 ), &filter_policy );//设置白名单，广播数据只能被白名单中的设备进行扫描到
-    }
-    else
-    {
-        uint8_t policy = GAP_FILTER_POLICY_ALL;     //GAP_FILTER_POLICY_ALL表示不进行过滤，任何设备都可以扫描和连接
-        GAPRole_SetParameter(GAPROLE_ADV_FILTER_POLICY, sizeof(policy), &policy);  //意味着设备的广播数据可以被所有设备接受，不进行过滤
+        // 先确定是有效地址，再根据地址是否是当前连接的设备来决定是否启用单一绑定
+        // if(TRUE == g_device_info.ID[index].isbond)
+        {
+            if(index != g_device_info.bondIdx)
+            {
+                PRINT("+++++++++++++++++++++++++++ENABLE %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", index,
+                    g_device_info.ID[index].MacAddr[0], g_device_info.ID[index].MacAddr[1], g_device_info.ID[index].MacAddr[2],
+                    g_device_info.ID[index].MacAddr[3], g_device_info.ID[index].MacAddr[4], g_device_info.ID[index].MacAddr[5]);
+                GAPBondMgr_SetParameter(GAPBOND_DISABLE_SINGLEBOND ,7, &g_device_info.ID[index].addr_type);
+            }else {
+                PRINT("+++++++++++++++++++++++++++ENABLE %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", index,
+                    g_device_info.ID[index].MacAddr[0], g_device_info.ID[index].MacAddr[1], g_device_info.ID[index].MacAddr[2],
+                    g_device_info.ID[index].MacAddr[3], g_device_info.ID[index].MacAddr[4], g_device_info.ID[index].MacAddr[5]);
+                GAPBondMgr_SetParameter(GAPBOND_ENABLE_SINGLEBOND ,7, &g_device_info.ID[index].addr_type);
+            }
+        }
     }
 
+    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+#endif
     // Set the GAP Characteristics
     GGS_SetParameter(GGS_DEVICE_NAME_ATT, sizeof(attDeviceName), (void *)attDeviceName);
 
@@ -414,24 +434,48 @@ static void IncrementMacAddress(void)
 
 void connectAnotherDevice(uint8_t slot_index)
 {
+    PRINT("+++++++++++++connectAnotherDevice:%d \r\n", slot_index);
     if(g_device_info.bondIdx == slot_index)
     {
         return;
     }
+    PRINT("+++++++++++++++++++++++++++FUCK 0: \r\n");
     g_device_info.ID[g_device_info.bondIdx].isbond = 0;
     g_device_info.bondIdx = slot_index;
     GAPRole_TerminateLink(hidEmuConnHandle);   //断开当前连接
 
-    for(uint8_t index = 0; index <= BLE_SNV_NUM; index++)
+    
+    CH58X_BLEInit();
+    HAL_Init();
+    GAPRole_PeripheralInit();
+    HidDev_Init();
+    HidEmu_Init();
+    ble_task_init();
+
+    uint8_t index = 0;
+    for(index = 0; index < BLE_SNV_NUM; index++)
     {
         if(index != slot_index)
         {
-            if(g_device_info.ID[index].isbond)
-            {
+            // if(TRUE == g_device_info.ID[index].isbond)
+            // {
+                PRINT("+++++++++++++++++++++++++++DISABLE %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", index,
+                    g_device_info.ID[index].MacAddr[0], g_device_info.ID[index].MacAddr[1], g_device_info.ID[index].MacAddr[2],
+                    g_device_info.ID[index].MacAddr[3], g_device_info.ID[index].MacAddr[4], g_device_info.ID[index].MacAddr[5]);
                 GAPBondMgr_SetParameter(GAPBOND_DISABLE_SINGLEBOND ,7, &g_device_info.ID[index].addr_type);
-            }
+            // }else {
+            //     PRINT("+++++++++++++++++++++++++++DISABLE %d, INVALID MAC\r\n", index);
+            // }
+        }else {
+            PRINT("+++++++++++++++++++++++++++ENABLE %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", index,
+                g_device_info.ID[index].MacAddr[0], g_device_info.ID[index].MacAddr[1], g_device_info.ID[index].MacAddr[2],
+                g_device_info.ID[index].MacAddr[3], g_device_info.ID[index].MacAddr[4], g_device_info.ID[index].MacAddr[5]);
+            GAPBondMgr_SetParameter(GAPBOND_ENABLE_SINGLEBOND ,7, &g_device_info.ID[index].addr_type);
         }
     }
+
+    GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);   //设置广播包
+    GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);  //设置扫描应答包
 
     uint8_t initial_advertising_enable = TRUE;    //定义广播开启
     GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);  //开启广播
@@ -541,7 +585,7 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
             {
                 PRINT("Advertising timeout..\n");
             }
-            #if 0 
+            #if 1
             // Enable advertising
             {
                 uint8_t initial_advertising_enable = TRUE;
@@ -549,18 +593,20 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
             }
             #endif
-            if(g_device_info.ID[g_device_info.bondIdx].isbond)  //已经完成配对，mydevinfo.isbond这标志为1
-            {
-                uint8 syncWL = TRUE;
-                GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
-                uint8 filter_policy = GAP_FILTER_POLICY_WHITE;      //只允许白名单设备扫描和连接，GAP_FILTER_POLICY_WHITE表示只有在白名单中的设备才能进行扫描和连接。
-                GAPRole_SetParameter( GAPROLE_ADV_FILTER_POLICY, sizeof( uint8 ), &filter_policy );//设置白名单，广播数据只能被白名单中的设备进行扫描到
-            }
-            else
-            {
-                uint8_t policy = GAP_FILTER_POLICY_ALL;     //GAP_FILTER_POLICY_ALL表示不进行过滤，任何设备都可以扫描和连接
-                GAPRole_SetParameter(GAPROLE_ADV_FILTER_POLICY, sizeof(policy), &policy);  //意味着设备的广播数据可以被所有设备接受，不进行过滤
-            }
+            // if((TRUE == g_device_info.ID[g_device_info.bondIdx].isbond) )  //已经完成配对，mydevinfo.isbond这标志为1
+            // {
+            //     uint8 syncWL = TRUE;
+            //     GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
+            //     uint8 filter_policy = GAP_FILTER_POLICY_WHITE;      //只允许白名单设备扫描和连接，GAP_FILTER_POLICY_WHITE表示只有在白名单中的设备才能进行扫描和连接。
+            //     GAPRole_SetParameter( GAPROLE_ADV_FILTER_POLICY, sizeof( uint8 ), &filter_policy );//设置白名单，广播数据只能被白名单中的设备进行扫描到
+            //     PRINT("After disconnect 1..\r\n");
+            // }
+            // else
+            // {
+            //     uint8_t policy = GAP_FILTER_POLICY_ALL;     //GAP_FILTER_POLICY_ALL表示不进行过滤，任何设备都可以扫描和连接
+            //     GAPRole_SetParameter(GAPROLE_ADV_FILTER_POLICY, sizeof(policy), &policy);  //意味着设备的广播数据可以被所有设备接受，不进行过滤
+            //     PRINT("After disconnect 2..\r\n");
+            // }
             break;
 
         case GAPROLE_ERROR:

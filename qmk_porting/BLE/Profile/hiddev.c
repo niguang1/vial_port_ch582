@@ -886,12 +886,10 @@ static void hidDevPairStateCB(uint16_t connHandle, uint8_t state, uint8_t status
         uint8_t addr_type;       //用于存储设备地址类型
         tmos_snv_read(mainRecordNvID(g_device_info.bondIdx), sizeof(gapBondRec_t), &bond_info);  //从非易失性存储器中读取绑定记录
         //打印绑定地址
-        PRINT("identity addr (");
-        for(int i = 0 ; i < 6; i ++)
-        {
-            PRINT("%#x ", bond_info.publicAddr[i]);
-        }
-        PRINT(")\n");
+        PRINT("save index %d, MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",g_device_info.bondIdx,
+        bond_info.publicAddr[0], bond_info.publicAddr[1], bond_info.publicAddr[2],
+        bond_info.publicAddr[3], bond_info.publicAddr[4], bond_info.publicAddr[5]);
+    
         memcpy( g_device_info.ID[g_device_info.bondIdx].MacAddr, bond_info.publicAddr, 6);
         g_device_info.ID[g_device_info.bondIdx].addr_type = gapDetermineAddrTypee(bond_info.publicAddr);
         g_device_info.ID[g_device_info.bondIdx].isbond = true; //此次设备绑定生效
