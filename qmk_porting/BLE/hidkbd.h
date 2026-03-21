@@ -38,11 +38,20 @@ extern "C" {
  */
 typedef struct{
     bool isbond;
-    uint8_t remote_addr_type;
-    uint8_t remote_addr[6];
-} DeviceID_t;
+    UINT8 addr_type;
+    UINT8 MacAddr[6];
+}Device_ID_;
 
-extern DeviceID_t mydevinfo;
+typedef struct
+{
+    Device_ID_ ID[16];
+    uint8_t bondIdx;        //当前选择的设备的索引
+}Device_Info_;
+
+extern Device_Info_ g_device_info;
+
+#define DEVICE_INFO_EEPROM_OFFSET 0
+
 /*********************************************************************
  * FUNCTIONS
  */
@@ -61,7 +70,7 @@ extern void HidEmu_Init(void);
  */
 extern uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events);
 
-void connectAnotherDevice();
+void connectAnotherDevice(uint8_t slot_index);
 
 /*********************************************************************
 *********************************************************************/

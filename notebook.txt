@@ -8,6 +8,80 @@ cmake -Dkeyboard=starlight -Dkeymap=default -DCMAKE_BUILD_TYPE=Release ..
 给这个宏关掉看能不能启动MCUBOOT_VALIDATE_PRIMARY_SLOT
 
 
+清除绑定可以调用：GAPBondMgr_SetParameter( GAPBOND_ERASE_ALLBONDS, 0, NULL );
+关闭白名单可以修改白名单策略，
+清除白名单可以调用：LL_ClearWhiteList
+uint8_t syncWL = FALSE;
+GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8_t ), &syncWL );
+该函数传false的话就是不清除白名单，不将 NV 中绑定所存储的每个唯一地址添加到白名单中。
+
+删除单个绑定或删除所有绑定接口函数实现：
+GAPBondMgr_SetParameter(GAPBOND_ERASE_SINGLEBOND, 6 + 1, BUF);
+GAPBondMgr_SetParameter( GAPBOND_ERASE_ALLBONDS, 0, NULL );
+
+
+在应用层对绑定进行管理,简而言之，应用层获取并记录所有绑定设备的身份地址（注1）并编好号，
+当想要和编号1的主机连接时，拒绝与其他编号的主机连接（注2）。 详解与代码实现：
+首先，创建对绑定设备管理的结构体
+typedef struct
+{
+ UINT8 addr_type;
+ UINT8 McaAddr[6];
+ UINT8 Direct_flag;
+}Device_ID_;
+typedef struct
+{
+ UINT8 CHECKFLAG;
+ UINT8 ID_Num;
+ Device_ID_ ID[4]; //here
+ UINT8 mod;
+ Led_Info_ Led_Info;
+ RF_Pair_Info_ RF_Pair_Info;
+}Device_Info_;
+然后，写好HID应用，使能绑定功能
+需要注意的是，这边需要关闭GAPBOND_ERASE_AUTO功能，因为在多绑定的应用中，
+很容易出现绑定的设备超过绑定列表大小的问题，若开启自动擦除，先前绑定的设备回连回产生问题
+uint8 erase = DISABLE;
+GAPBondMgr_SetParameter( GAPBOND_ERASE_AUTO, sizeof( uint8 ), &erase );
+接着就到了关键的地方，获取设备的身份地址，只有在与设备建立绑定后，才会获取设备的身份地址，所以在绑定状态回调中再获取身份地址
+gapBondRec_t bondRecn;
+tmos_snv_read(mainRecordNvID(n), sizeof(gapBondRec_t), &bondRecn); //n绑定设备的索引（bondIdx），如第一个绑定的设备n=0，第二个n=1...
+memcpy( MacAddrn,bondRecn.publicAddr, 6 );
+这边由于gapBondRec_t中stateFlags 的获取方式协议栈没给出（其实有相关代码只是没有放出来，获取后期会放出），所以只能上层管理，
+如绑定了第一个设备查询bondIdx0 查询到主机的省份地址后，将地址储存起来
+自己管理
+memcpy( Device_Info.ID[n].McaAddr ,MacAddrn, 6);
+然后需要计算地址的地址类型
+uint8 gapDetermineAddrTypee( uint8 *addr)
+{
+ uint8 tmp;
+ if( addr != NULL){
+ tmp = addr[5] & 0xC0;
+ if ( tmp == 0xC0 ){
+ return ADDRTYPE_STATIC;
+ }
+ else if ( tmp == 0x40 ){
+ return ADDRTYPE_PRIVATE_RESOLVE;
+ }
+ else if(tmp == 0x80)
+ {
+ return ADDRTYPE_PUBLIC;
+ }
+
+ else{
+ return ADDRTYPE_PRIVATE_NONRESOLVE;
+ }
+ }
+}
+Device_Info.ID[n].addr_type = gapDetermineAddrTypee(MacAddrn);
+
+最后，地址类型和地址都获取到了，只需要禁止指定地址连接即可
+
+GAPBondMgr_SetParameter( GAPBOND_DISABLE_SINGLEBOND ,7, &Device_Info.ID[0].addr_type ); 
+注1：身份地址为唯一的地址，手机设置里看到的蓝牙地址就是身份地址，然而手机与设备连接时使用的地址是随机的，所以在连接状态回调中获取的地址（连接地址）是随机的。 注2：拒绝与主机连接并不是不连接，而
+是连接上之后立马主动断开，断开的时间空隙让其他主机连接。个人认为此方法并不是很完善，但是了解的业内似乎都是这么做的，可能暂时没有更好的办法。
+
+USER_EEPROM_START_POSITION
 
 ./mcuboot/scripts/imgtool.py verify build/starlight_signed.hex
 

@@ -92,6 +92,10 @@ static void platform_initialize()
 #endif
     CH58X_BLEInit();
     HAL_Init();
+
+    uint8_t data_buf[(sizeof(g_device_info) / 4 + (size_t)(sizeof(g_device_info) % 4 ? 1 : 0)) * 4];
+    EEPROM_READ(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET, data_buf, sizeof(g_device_info));
+    memcpy(&g_device_info, data_buf, sizeof(g_device_info));
 }
 
 static void protocol_setup()

@@ -830,7 +830,26 @@ static void hidDevParamUpdateCB(uint16_t connHandle, uint16_t connInterval,
 {
     PRINT("Update %d - Int 0x%x - Latency %d\n", connHandle, connInterval, connSlaveLatency);
 }
-
+uint8 gapDetermineAddrTypee( uint8 *addr)
+{
+    uint8 tmp;
+    if( addr != NULL){
+        tmp = addr[5] & 0xC0;
+        if ( tmp == 0xC0 ){
+            return ADDRTYPE_STATIC;
+        }
+        else if ( tmp == 0x40 ){
+            return ADDRTYPE_PRIVATE_RESOLVE;
+        }
+        else if(tmp == 0x80)
+        {
+            return ADDRTYPE_PUBLIC;
+        }
+        else {
+            return ADDRTYPE_PRIVATE_NONRESOLVE;
+        }
+    }
+}
 /*********************************************************************
  * @fn      hidDevPairStateCB
  *
@@ -865,7 +884,7 @@ static void hidDevPairStateCB(uint16_t connHandle, uint8_t state, uint8_t status
         /******************************添加代码***************************************/
         gapBondRec_t bond_info;   //用于存储读取的绑定记录信息
         uint8_t addr_type;       //用于存储设备地址类型
-        tmos_snv_read(mainRecordNvID(0), sizeof(gapBondRec_t), &bond_info);  //从非易失性存储器中读取绑定记录
+        tmos_snv_read(mainRecordNvID(g_device_info.bondIdx), sizeof(gapBondRec_t), &bond_info);  //从非易失性存储器中读取绑定记录
         //打印绑定地址
         PRINT("identity addr (");
         for(int i = 0 ; i < 6; i ++)
@@ -873,22 +892,12 @@ static void hidDevPairStateCB(uint16_t connHandle, uint8_t state, uint8_t status
             PRINT("%#x ", bond_info.publicAddr[i]);
         }
         PRINT(")\n");
-        tmos_memcpy(mydevinfo.remote_addr, bond_info.publicAddr, 6);//将此次绑定的地址赋值到自己定义的地址数组中去，以便定向广播或者白名单回连使用
-        //为identity address， 可能为public address,也可能是random static address
-        if( (bond_info.publicAddr[5] & 0xC0) == 0x80 )
-        {
-            addr_type = 0;
-        }
-        else
-        {
-            addr_type = 1;
-        }
-        extern uint8_t devAddrType;
-        (devAddrType)?1:(addr_type = 0);
-        if(devAddrType == 3)
-            addr_type |= devAddrType<<4;
-        mydevinfo.remote_addr_type = addr_type;//获取主机的地址类型
-        mydevinfo.isbond = 1;//此次设备绑定生效
+        memcpy( g_device_info.ID[g_device_info.bondIdx].MacAddr, bond_info.publicAddr, 6);
+        g_device_info.ID[g_device_info.bondIdx].addr_type = gapDetermineAddrTypee(bond_info.publicAddr);
+        g_device_info.ID[g_device_info.bondIdx].isbond = true; //此次设备绑定生效
+
+        EEPROM_ERASE(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET, EEPROM_PAGE_SIZE);
+        EEPROM_WRITE(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET / EEPROM_PAGE_SIZE * EEPROM_PAGE_SIZE, &g_device_info, sizeof(g_device_info));
         /*****************************END*************************************/
     }
 }

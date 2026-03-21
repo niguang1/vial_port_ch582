@@ -28,9 +28,8 @@
 static uint8_t bleTaskId = INVALID_TASK_ID;
 extern void suspend_power_down_quantum();
 extern void suspend_wakeup_init_quantum();
-DeviceID_t mydevinfo;
-uint8_t devAddr[6];
-uint8_t devAddrType;
+
+Device_Info_ g_device_info;
 
 /*********************************************************************
  * MACROS
@@ -234,7 +233,7 @@ void HidEmu_Init()
     GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);   //设置广播包
     GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);  //设置扫描应答包
 
-    if(mydevinfo.isbond)  //已经完成配对，mydevinfo.isbond这标志为1
+    if(g_device_info.ID[g_device_info.bondIdx].isbond)  //已经完成配对，mydevinfo.isbond这标志为1
     {
         uint8 syncWL = TRUE;
         GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步
@@ -257,11 +256,13 @@ void HidEmu_Init()
         uint8_t  mitm = DEFAULT_MITM_MODE;
         uint8_t  ioCap = DEFAULT_IO_CAPABILITIES;
         uint8_t  bonding = DEFAULT_BONDING_MODE;
+        uint8 erase = DISABLE;
         GAPBondMgr_SetParameter(GAPBOND_PERI_DEFAULT_PASSCODE, sizeof(uint32_t), &passkey);
         GAPBondMgr_SetParameter(GAPBOND_PERI_PAIRING_MODE, sizeof(uint8_t), &pairMode);
         GAPBondMgr_SetParameter(GAPBOND_PERI_MITM_PROTECTION, sizeof(uint8_t), &mitm);
         GAPBondMgr_SetParameter(GAPBOND_PERI_IO_CAPABILITIES, sizeof(uint8_t), &ioCap);
         GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, sizeof(uint8_t), &bonding);
+        GAPBondMgr_SetParameter(GAPBOND_ERASE_AUTO, sizeof( uint8 ), &erase);
     }
 
     // Setup Battery Characteristic Values
@@ -411,20 +412,26 @@ static void IncrementMacAddress(void)
     }
 }
 
-void connectAnotherDevice()
+void connectAnotherDevice(uint8_t slot_index)
 {
-    mydevinfo.isbond = 0;
+    if(g_device_info.bondIdx == slot_index)
+    {
+        return;
+    }
+    g_device_info.ID[g_device_info.bondIdx].isbond = 0;
+    g_device_info.bondIdx = slot_index;
     GAPRole_TerminateLink(hidEmuConnHandle);   //断开当前连接
-    IncrementMacAddress();   // 递增 MAC 地址的函数
-    printf("Updated MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-            MacAddr[0], MacAddr[1], MacAddr[2],
-            MacAddr[3], MacAddr[4], MacAddr[5]);
 
-    CH58X_BLEInit();
-    HAL_Init();
-    GAPRole_PeripheralInit();
-    HidDev_Init();
-    HidEmu_Init();
+    for(uint8_t index = 0; index <= BLE_SNV_NUM; index++)
+    {
+        if(index != slot_index)
+        {
+            if(g_device_info.ID[index].isbond)
+            {
+                GAPBondMgr_SetParameter(GAPBOND_DISABLE_SINGLEBOND ,7, &g_device_info.ID[index].addr_type);
+            }
+        }
+    }
 
     uint8_t initial_advertising_enable = TRUE;    //定义广播开启
     GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);  //开启广播
@@ -511,8 +518,6 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 hidEmuConnHandle = event->connectionHandle;
                 tmos_start_task(hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY);
                 PRINT("Connected..\n");
-                tmos_memcpy(devAddr, event->devAddr, 6);//获取设备地址
-                devAddrType = event->devAddrType;//获取设备地址类型
             }
             break;
 
@@ -544,7 +549,7 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
             }
             #endif
-            if(mydevinfo.isbond)  //已经完成配对，mydevinfo.isbond这标志为1
+            if(g_device_info.ID[g_device_info.bondIdx].isbond)  //已经完成配对，mydevinfo.isbond这标志为1
             {
                 uint8 syncWL = TRUE;
                 GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8 ), &syncWL );  //配对绑定自动同步

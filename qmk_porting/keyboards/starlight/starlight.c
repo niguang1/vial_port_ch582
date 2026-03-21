@@ -23,28 +23,6 @@ bool wireless_pre_process_record_kb(uint16_t keycode, keyrecord_t *record)
 {
     return true;
 }
-bool wireless_process_record(uint16_t keycode, keyrecord_t *record)
-{
-    switch (keycode) {
-        case BLE_SLOT0 ...(BLE_SLOT0 + BLE_SLOT_NUM - 1):
-            if (record->event.pressed) {
-                if (kbd_protocol_type == kbd_protocol_ble)
-                {
-                    connectAnotherDevice();
-                } else {
-                    bootloader_boot_mode_set(BOOTLOADER_BOOT_MODE_BLE);
-                    soft_reset_keyboard();
-                }
-            }
-            return false;
-        case BLE_ALL_CLEAR:
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool process_ble_passcode(uint16_t keycode, keyrecord_t * record)
 {
     return true;

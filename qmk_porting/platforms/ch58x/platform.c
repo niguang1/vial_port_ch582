@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "gpio.h"
 #include "quantum.h"
 #include "quantum_keycodes.h"
+#include "extra_keycode.h"
+#include "bootloader.h"
+#include "hidkbd.h"
 
 volatile uint8_t kbd_protocol_type = 0;
 #if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
@@ -33,6 +36,34 @@ uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 
 #endif
 
+#if defined BLE_ENABLE || (defined ESB_ENABLE && (ESB_ENABLE == 1 || ESB_ENABLE == 2))
+extern Device_Info_ g_device_info;
+
+bool wireless_process_record(uint16_t keycode, keyrecord_t *record)
+{
+    switch (keycode) {
+        case BLE_SLOT0 ...(BLE_SLOT0 + BLE_SLOT_NUM - 1):
+            if (record->event.pressed) {
+                if (kbd_protocol_type == kbd_protocol_ble)
+                {
+                    connectAnotherDevice(keycode - BLE_SLOT0);
+                } else {
+                    bootloader_boot_mode_set(BOOTLOADER_BOOT_MODE_BLE);
+                    soft_reset_keyboard();
+                }
+            }
+            return false;
+        case BLE_ALL_CLEAR:
+        {
+            GAPBondMgr_SetParameter(GAPBOND_ERASE_ALLBONDS, 0, NULL);
+
+            EEPROM_ERASE(USER_EEPROM_START_POSITION + DEVICE_INFO_EEPROM_OFFSET, EEPROM_PAGE_SIZE);
+            return false;
+        }
+    }
+    return true;
+}
+#endif
 
 __HIGH_CODE _PUTCHAR_CLAIM;
 
