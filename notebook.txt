@@ -19,6 +19,7 @@ GAPBondMgr_SetParameter( GAPBOND_AUTO_SYNC_RL, sizeof( uint8_t ), &syncWL );
 GAPBondMgr_SetParameter(GAPBOND_ERASE_SINGLEBOND, 6 + 1, BUF);
 GAPBondMgr_SetParameter( GAPBOND_ERASE_ALLBONDS, 0, NULL );
 
+GAPBOND_BOND_COUNT
 
 在应用层对绑定进行管理,简而言之，应用层获取并记录所有绑定设备的身份地址（注1）并编好号，
 当想要和编号1的主机连接时，拒绝与其他编号的主机连接（注2）。 详解与代码实现：
